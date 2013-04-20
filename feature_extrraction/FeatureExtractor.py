@@ -8,5 +8,5 @@ class FeatureExtractor:
 	"""
 	perhaps only method? training example -> vector
 	"""
-	
-	def extract(data): pass
+
+	def extract(self,data): pass
