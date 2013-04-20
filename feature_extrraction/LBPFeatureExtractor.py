@@ -1,0 +1,3 @@
+import FeatureExtractor
+
+class LBPFeatureExtractor(FeatureExtractor):pass
