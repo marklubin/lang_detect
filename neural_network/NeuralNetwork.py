@@ -16,8 +16,9 @@ class NeuralNetwork:
 	theta       : list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
 	"""
 
-	def __init__(self,activationFn,nUnits,nClasses,inputSize,nFeatures,description,theta=None):
+	def __init__(self,activationFn,activationFnGrad,nUnits,nClasses,inputSize,nFeatures,description,theta=None):
 		self.activationFn = activationFn
+		self.activationFnGrad = activationFnGrad
 		self.description = description
 		#self.nLayers = nLayers TODO variable number of hidden layers
 		self.nUnits = nUnits
@@ -93,9 +94,31 @@ class NeuralNetwork:
 		return J + R
 
 	"""
-	compute gradient at this theta
+	compute gradient at this theta, currently this will only work for single hidden layer
 	"""
-	def gradient(self,X,y,theta):pass
+	def gradient(self,X,y,theta):
+		m,n = X.shape
+		A = []
+		Z = [[0]]#dummy Z[0] to keep indicies consistent
+		Y = self.matrix_rep(y)
+
+		for W in theta:
+			X = np.concatenate((np.ones((m,1)),X),1)
+			A.append(X[:])
+			X = X.dot(W.T)
+			Z.append(X[:])
+			X = self.activationFn(X)
+
+		#remove extra col of 1's for final layer
+		A[-1] = A[-1][:,1:]
+
+		D3 = A[2] - Y
+
+		d2 = D3.dot(theta[1])
+		d2 = d2[0:m-1,1:theta[1].shape[0]]
+
+		D2 = d2 * self.activationFnGrad(Z[1])
+
 
 
 
@@ -112,6 +135,10 @@ class NeuralNetwork:
 def sigmoid(X): 
 	return 1.0 / (1.0 + np.exp(-1. * X))
 
+def sigmoidgradient(z):
+	s = sigmoid(z)
+	return s * (np.ones(z.shape) - s)
+
 def main():
 	data = loadmat('ex3data1.mat')
 	X = data['X']
@@ -120,8 +147,9 @@ def main():
 	y = np.array([i[0] for i in y])
 	data = loadmat('ex3weights.mat')
 	theta = [data['Theta1'],data['Theta2']]
-	N = NeuralNetwork(sigmoid,25,10,X.shape[0],X.shape[1],"ex3test",theta)
+	N = NeuralNetwork(sigmoid,sigmoidgradient,25,10,X.shape[0],X.shape[1],"ex3test",theta)
 	print "Test data accurate to %f" % N.getAccuracy(X,y)
 	print "Cost a test Theta %f" % N.cost_function(X,y,theta)
+	print "Gradient at test Theta" + str(N.gradient(X,y,theta))
 
 if __name__ == "__main__": main()
