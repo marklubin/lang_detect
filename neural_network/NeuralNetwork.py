@@ -4,12 +4,6 @@
 	Mark Lubin
 """
 
-"""
-TODO:
-Handle unroll/rolling of thetas
-implement gradient
-"""
-ITERS = 20
 import numpy as np
 from scipy.io import loadmat
 from scipy.optimize import fmin_tnc as minimizer
@@ -44,30 +38,35 @@ class NeuralNetwork:
 		theta0 = self.roll(self.theta)
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,lambda x: self.gradient(X,y,x))
 		self.theta = self.unroll(self.theta,results[0])
-		
 
 	"""
-	feedforward propagation algorithm
+	feedforward that returns A & Z as lists
 	"""
 	def feedforward(self,X,theta):
 		nExamples, nFeatures = X.shape
 		if(nFeatures != self.nFeatures):
-			raise Exception("Invalid number of features got %d expected %d." % (nFeatures, self.nFeatures) )
+			raise Exception("Invalid number of features got %d expected %d." %\
+			 (nFeatures, self.nFeatures))
+		A = [np.concatenate((np.ones((X.shape[0],1)),X),1)]
+		Z = [None] #spacer because there is no Z[0]
 		
 		#compute feed forward propagation
 		for W in theta:
-			#import pdb;pdb.set_trace();
 			X = np.concatenate((np.ones((X.shape[0],1)),X),1) #add column of ones
-			X = self.activationFn(X.dot(W.T))
+			X = X.dot(W.T)
+			Z.append(X[:])
+			X = self.activationFn(X)
+			A.append(X[:])
 
-		return X
+		return A,Z
 
 	"""
 	return prediction for this set of examples
 	"""
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
-		return np.argmax(self.feedforward(X,theta),1)
+		A,Z = self.feedforward2(X,theta)
+		return np.argmax(A[-1],1)
 	
 	"""
 	return the accuracy of the current thetas on the data set X
@@ -76,9 +75,7 @@ class NeuralNetwork:
 		return sum(map(lambda x: 1 if x[0] == x[1] else 0,zip(self.predict(X),y))) / float(len(y))
 
 	"""
-	convert vector like [0 1 2] to [[1 0 0]
-									[0 1 0]
-									[0 0 1]]
+	convert vector like [0 1 2] to [[1 0 0][0 1 0][0 0 1]]
 	y : original vector
 	N : number of classes
 	"""
@@ -89,8 +86,7 @@ class NeuralNetwork:
 	"""
 	unroll the provided vector into the format provided by the template
 	"""
-	@staticmethod
-	def unroll(template,vector):
+	def unroll(self,template,vector):
 		#unroll theta 
 		offset = 0 
 		M = template[:]
@@ -104,8 +100,7 @@ class NeuralNetwork:
 	"""
 	roll the provided data (an array of npdarrays) in a vector
 	"""
-	@staticmethod
-	def roll(M):
+	def roll(self,M):
 		return np.concatenate([W.flatten() for W in M])
 
 
@@ -198,6 +193,6 @@ def prop_test():
 	N.train(X,y)
 	print "Test data accurate to %f" % N.getAccuracy(X,y)
 
-if __name__ == "__main__": prop_test()
+if __name__ == "__main__": main()
 
 
