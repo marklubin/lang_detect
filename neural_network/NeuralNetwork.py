@@ -6,7 +6,7 @@
 EPSILON = .12
 import numpy as np
 from scipy.io import loadmat,savemat
-from scipy.optimize import fmin_tnc as minimizer
+from scipy.optimize import fmin_l_bfgs_b as minimizer
 
 class NeuralNetwork:
 	"""
@@ -17,7 +17,7 @@ class NeuralNetwork:
 				  used with saved matrices only
 	"""
 
-	def __init__(self,activationFn,activationFnGrad,params,description,theta=None):
+	def __init__(self,activationFn,activationFnGrad,description,params=None,theta=None):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
 		self.description = description
@@ -167,19 +167,18 @@ def main():
 	data = loadmat('ex3weights.mat')
 	theta = [data['Theta1'],data['Theta2']]
 	params = [(25,401),(25,26),(10,26)]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,params,"ex3test",theta)
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params,theta)
 	print "Test data accurate to %f" % N.getAccuracy(X,y)
 	C,G = N.cost_function(X,y,N.roll(theta))
 	print "Cost a test Theta %f" % C
-	print "Gradient: " + str(G)
 
 def prop_test():
 	data = loadmat('ex3data1.mat')
 	X = data['X']
 	y = data['y'] - 1
 	y = np.array([i[0] for i in y])
-	params = [(25,401),(10,26),(10,11),(10,11)]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,params,"ex3test")
+	params = [(25,401),(10,26)]
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.getAccuracy(X,y)
 
