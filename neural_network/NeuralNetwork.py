@@ -25,7 +25,7 @@ class NeuralNetwork:
 		self.theta = []		
 		if theta:
 			self.theta = theta
-		else if params:
+		elif params:
 			for dim in params:
 				self.theta.append(EPSILON * np.random.random_sample(dim))
 		else:
@@ -69,7 +69,8 @@ class NeuralNetwork:
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
 		A,Z = self.feedforward(X,theta)
-		return np.argmax(A[-1],1)
+		results = np.argmax(A[-1],1)
+		return results
 	
 	"""
 	return the accuracy of the current thetas on the data set X
@@ -180,6 +181,20 @@ def prop_test():
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
-if __name__ == "__main__": prop_test()
+def lang_test():
+	data = loadmat("C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extrraction\\training.mat")
+	X = data['X']
+	y = np.array([i[0] for i in data['y']])
+	params = [(100,X.shape[1]+1),(2,101)]
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"RussianVEnglish",params)
+	N.train(X,y)
+	print "Test data accurate to %f" % N.get_accuracy(X,y)
+
+if __name__ == "__main__": lang_test()
+
+
+
+
+
 
 

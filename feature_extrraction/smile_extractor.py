@@ -1,8 +1,10 @@
 """
 smile_extractor.py
-#append the feature matrices with result of running extactor on directory
-#call as 
+-append the feature matrices with result of running extactor on directory
+-call as 
 	python smile_extractor.py <DIRECTORY> <LABEL> <MAT_FILE>
+
+Mark Lubin
 
 """
 from scipy.io import loadmat,savemat
@@ -23,18 +25,17 @@ def main():
 	try:
 		 data = loadmat(outfilename)
 		 X = data['X'].tolist()
-		 y = data['y'].tolist()
+		 y = [x[0] for x in data['y'].tolist()]
 	except IOError:
 		 X = []
 		 y = []
-
 
 	for fname in listdir(directory):
 		features = parse_features(directory + "\\" + fname)
 		X.append(features)
 		y.append(label)
 
-	results = {'X' : np.array(X),'y' : np.array(y)}
+	results = {'X' : np.array(X),'y' :y}
 
 	savemat(outfilename,results)
 
