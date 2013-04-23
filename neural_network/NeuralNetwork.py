@@ -1,6 +1,6 @@
 """
 	NeuralNetwork.py
-	Single Hidden Layer(for now) MLP Neural Network
+	MLP Neural Network
 	Mark Lubin
 """
 EPSILON = .12
@@ -10,11 +10,12 @@ from scipy.optimize import fmin_l_bfgs_b as minimizer
 
 class NeuralNetwork:
 	"""
-	activationFn: function eg. g = sigmoid(x)
-	description : what is this NN? eg. English V. Chinese Classifier
-	params		: list of matrix sizes for the thetas
-	theta       : list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
-				  used with saved matrices only
+	activationFn 	: function eg. sigmoid
+	activationFnGrad: gradient function eg. sigmoidgradient
+	description 	: what is this NN? Used as filename for output eg. 'EnglishVRussianClassifier'
+	params			: list of matrix sizes for the thetas eg. ((25,401),(10,26))
+	theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
+				  	  used with saved matrices only
 	"""
 
 	def __init__(self,activationFn,activationFnGrad,description,params=None,theta=None):
@@ -24,9 +25,11 @@ class NeuralNetwork:
 		self.theta = []		
 		if theta:
 			self.theta = theta
-		else:
+		else if params:
 			for dim in params:
 				self.theta.append(EPSILON * np.random.random_sample(dim))
+		else:
+			raise Exception("Invalid use must supply either theta or params.")
 
 	"""
 	train neural network on provided dataset
@@ -87,7 +90,6 @@ class NeuralNetwork:
 	unroll the provided vector into the format provided by the template
 	"""
 	def unroll(self,template,vector):
-		#unroll theta 
 		offset = 0 
 		M = template[:]
 		for i,W in enumerate(template):
@@ -98,7 +100,7 @@ class NeuralNetwork:
 		return M
 
 	"""
-	roll the provided data (an array of npdarrays) in a vector
+	roll the provided data (an list of np.arrays) into a vector
 	"""
 	def roll(self,M):
 		return np.concatenate([W.flatten() for W in M])
@@ -109,7 +111,6 @@ class NeuralNetwork:
 	return cost & gradient for this theta
 	"""
 	def cost_function(self,X,y,flat_theta,lmbd=1.):
-		#import pdb;pdb.set_trace();
 		theta = self.unroll(self.theta,flat_theta)
 		Y  = self.bool_matrix_rep(y,self.theta[-1].shape[0])
 		A,Z = self.feedforward(X,theta)
@@ -124,13 +125,12 @@ class NeuralNetwork:
 		
 		#compute regularization term
 		R =  lmbd/(2.0 * m) * sum([sum([q**2 for q in np.nditer(layer)]) for layer in theta])
-
-		print "Cost: %f" % (J+R)
+		J += R
 
 		G = self.gradient(A,Z,Y,(m,n),theta)
-		#G1 = self.gradient(X,y,flat_theta)
-		#import pdb;pdb.set_trace();
-		return (J + R),G
+		
+		print "Cost: %f" % J
+		return J,G
 
 
 	"""
