@@ -27,8 +27,6 @@ class NeuralNetwork:
 		else:
 			for dim in params:
 				self.theta.append(EPSILON * np.random.random_sample(dim))
-			#import pdb;pdb.set_trace();
-			#self.theta = [.12 * np.random.rand(nUnits,nFeatures+1), .12 * np.random.rand(nClasses,nUnits+1)]
 
 	"""
 	train neural network on provided dataset
@@ -73,7 +71,7 @@ class NeuralNetwork:
 	"""
 	return the accuracy of the current thetas on the data set X
 	"""
-	def getAccuracy(self,X,y):
+	def get_accuracy(self,X,y):
 		return sum(map(lambda x: 1 if x[0] == x[1] else 0,zip(self.predict(X),y))) / float(len(y))
 
 	"""
@@ -81,7 +79,7 @@ class NeuralNetwork:
 	y : original vector
 	N : number of classes
 	"""
-	def matrix_rep(self,y,N):
+	def bool_matrix_rep(self,y,N):
 		I = np.identity(N)
 		return np.array([I[i].tolist() for i in y])
 
@@ -113,7 +111,7 @@ class NeuralNetwork:
 	def cost_function(self,X,y,flat_theta,lmbd=1.):
 		#import pdb;pdb.set_trace();
 		theta = self.unroll(self.theta,flat_theta)
-		Y  = self.matrix_rep(y,self.theta[-1].shape[0])
+		Y  = self.bool_matrix_rep(y,self.theta[-1].shape[0])
 		A,Z = self.feedforward(X,theta)
 		H = A[-1]
 		m,n = H.shape
@@ -168,7 +166,7 @@ def main():
 	theta = [data['Theta1'],data['Theta2']]
 	params = [(25,401),(25,26),(10,26)]
 	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params,theta)
-	print "Test data accurate to %f" % N.getAccuracy(X,y)
+	print "Test data accurate to %f" % N.get_accuracy(X,y)
 	C,G = N.cost_function(X,y,N.roll(theta))
 	print "Cost a test Theta %f" % C
 
@@ -180,7 +178,7 @@ def prop_test():
 	params = [(25,401),(10,26)]
 	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params)
 	N.train(X,y)
-	print "Test data accurate to %f" % N.getAccuracy(X,y)
+	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
 if __name__ == "__main__": prop_test()
 
