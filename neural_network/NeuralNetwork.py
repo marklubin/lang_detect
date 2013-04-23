@@ -3,9 +3,16 @@
 	Single Hidden Layer(for now) MLP Neural Network
 	Mark Lubin
 """
+
+"""
+TODO:
+Handle unroll/rolling of thetas
+implement gradient
+"""
+ITERS = 20
 import numpy as np
 from scipy.io import loadmat
-from scipy.optimize import fmin_cg
+from scipy.optimize import fmin_tnc as minimizer
 
 class NeuralNetwork:
 	"""
@@ -27,12 +34,17 @@ class NeuralNetwork:
 		if theta:
 			self.theta = theta
 		else:
-			self.theta = [np.random.rand(nUnits,nFeatures+1), np.random.rand(nClasses,nUnits+1)]
+			self.theta = [.12 * np.random.rand(nUnits,nFeatures+1), .12 * np.random.rand(nClasses,nUnits+1)]
 
 	"""
 	train neural network on provided dataset
 	"""
-	def train(self,X,y):pass
+	def train(self,X,y):
+		#import pdb;pdb.set_trace();
+		theta0 = self.roll(self.theta)
+		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,lambda x: self.gradient(X,y,x))
+		self.theta = self.unroll(self.theta,results[0])
+		
 
 	"""
 	feedforward propagation algorithm
@@ -74,14 +86,40 @@ class NeuralNetwork:
 		I = np.identity(N)
 		return np.array([I[i].tolist() for i in y])
 
+	"""
+	unroll the provided vector into the format provided by the template
+	"""
+	@staticmethod
+	def unroll(template,vector):
+		#unroll theta 
+		offset = 0 
+		M = template[:]
+		for i,W in enumerate(template):
+			size = W.shape[0] * W.shape[1]
+			partial = vector[offset:offset + size]
+			M[i] = np.reshape(partial,W.shape)
+			offset += size
+		return M
+
+	"""
+	roll the provided data (an array of npdarrays) in a vector
+	"""
+	@staticmethod
+	def roll(M):
+		return np.concatenate([W.flatten() for W in M])
+
+
 
 	"""
 	return gradient for this matrix 
 	"""
-	def cost_function(self,X,y,theta,lmbd=1.):
+	def cost_function(self,X,y,flat_theta,lmbd=1.):
+		#import pdb;pdb.set_trace();
+		theta = self.unroll(self.theta,flat_theta)
 		Y  = self.matrix_rep(y,self.nClasses)
 		H = self.feedforward(X,theta)
 		m,n = H.shape
+		
 
 		#compute cost
 		J = (-1 * Y) * np.log(H) - (np.ones(Y.shape) - Y)\
@@ -91,48 +129,47 @@ class NeuralNetwork:
 		#compute regularization term
 		R =  lmbd/(2.0 * m) * sum([sum([q**2 for q in np.nditer(layer)]) for layer in theta])
 
+		print "Cost: %f" % (J+R)
 		return J + R
 
-	"""
-	compute gradient at this theta, currently this will only work for single hidden layer
-	"""
-	def gradient(self,X,y,theta):
+
+	def gradient(self,X,y,flat_theta):
 		m,n = X.shape
-		A = []
-		Z = [[0]]#dummy Z[0] to keep indicies consistent
-		Y = self.matrix_rep(y)
+		theta = self.unroll(self.theta,flat_theta)
+		Y = self.matrix_rep(y,self.nClasses)
 
-		for W in theta:
-			X = np.concatenate((np.ones((m,1)),X),1)
-			A.append(X[:])
-			X = X.dot(W.T)
-			Z.append(X[:])
-			X = self.activationFn(X)
+		delta1 = np.zeros(theta[0].shape)
+		delta2 = np.zeros(theta[1].shape)
 
-		#remove extra col of 1's for final layer
-		A[-1] = A[-1][:,1:]
+		for i,row in enumerate(X):
+			a1 = np.concatenate(([1],row))
+			z2 = a1.dot(theta[0].T)
+			a2 = np.concatenate(([1],self.activationFn(z2)))
+			z3 = a2.dot(theta[1].T)
+			a3 = self.activationFn(z3)
 
-		D3 = A[2] - Y
+			yi = Y[i]
 
-		d2 = D3.dot(theta[1])
-		d2 = d2[0:m-1,1:theta[1].shape[0]]
+			d3 = a3 - yi
 
-		D2 = d2 * self.activationFnGrad(Z[1])
+			d2 = d3.dot(theta[1]) * np.concatenate(([1],self.activationFnGrad(z2)))
+			d2 = d2[1:]
+			d3 = np.reshape(d3,(d3.shape[0],1))
+			a2 = np.reshape(a2,(1,a2.shape[0]))
+			
+			d2 = np.reshape(d2,(d2.shape[0],1))
+			a1 = np.reshape(a1,(1,a1.shape[0]))
+			
 
+			delta2 += d3.dot(a2)
+			delta1 += d2.dot(a1)
 
+		theta1grad = delta1/m
+		theta2grad = delta2/m
 
+		return self.roll([theta1grad,theta2grad])
 
-	"""
-	string representation of NeuralNetwork
-	"""
-	def __str__(self):pass
-
-	"""
-	serialized version of NeuralNetwork, probably just need to store thetas
-	"""
-	def __repr__(self):pass
-
-def sigmoid(X): 
+def sigmoid(X):
 	return 1.0 / (1.0 + np.exp(-1. * X))
 
 def sigmoidgradient(z):
@@ -149,7 +186,18 @@ def main():
 	theta = [data['Theta1'],data['Theta2']]
 	N = NeuralNetwork(sigmoid,sigmoidgradient,25,10,X.shape[0],X.shape[1],"ex3test",theta)
 	print "Test data accurate to %f" % N.getAccuracy(X,y)
-	print "Cost a test Theta %f" % N.cost_function(X,y,theta)
-	print "Gradient at test Theta" + str(N.gradient(X,y,theta))
+	print "Cost a test Theta %f" % N.cost_function(X,y,N.roll(theta))
+	print N.gradient(X,y,N.roll(theta))
 
-if __name__ == "__main__": main()
+def prop_test():
+	data = loadmat('ex3data1.mat')
+	X = data['X']
+	y = data['y'] - 1
+	y = np.array([i[0] for i in y])
+	N = NeuralNetwork(sigmoid,sigmoidgradient,25,10,X.shape[0],X.shape[1],"ex3test")
+	N.train(X,y)
+	print "Test data accurate to %f" % N.getAccuracy(X,y)
+
+if __name__ == "__main__": prop_test()
+
+
