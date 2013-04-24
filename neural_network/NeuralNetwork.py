@@ -211,9 +211,9 @@ def trainer():
 	filename = DEFAULT_DATA
 	if len(argv) ==2: filename = argv[1]
 	data = loadmat(filename)
-	X = data['X']
+	X = data['XNormalized']
 	y = np.array([i[0] for i in data['y']])
-	layers = [X.shape[1],25,2]
+	layers = [X.shape[1],25,3]
 	N = NeuralNetwork(layer_sizes=layers)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
