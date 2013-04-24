@@ -4,37 +4,44 @@
 	Mark Lubin
 """
 EPSILON = .12
+DEFAULT_DATA = "C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extraction\\training.mat"
+
 import numpy as np
 from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
+from sys import argv
 
 class NeuralNetwork:
 	"""
 	activationFn 	: function eg. sigmoid
 	activationFnGrad: gradient function eg. sigmoidgradient
 	description 	: what is this NN? Used as filename for output eg. 'EnglishVRussianClassifier'
-	params			: list of matrix sizes for the thetas eg. ((25,401),(10,26))
+	layer_sizes	    : nodes in NN in format [NFEATURES, LAYER1...LAYERN, NCLASSES]
 	theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
 				  	  used with saved matrices only
 	"""
 
-	def __init__(self,activationFn,activationFnGrad,description,params=None,theta=None):
+	def __init__(self,activationFn,activationFnGrad,description,layer_sizes=None,theta=None):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
 		self.description = description
 		self.theta = []		
 		if theta:
 			self.theta = theta
-		elif params:
-			for dim in params:
+		elif layer_sizes:
+			if len(layer_sizes) < 3:
+				raise Exception("Need atleast single hidden layer")
+			for i in range(0,len(layer_sizes)-1):
+				dim = (layer_sizes[i+1],layer_sizes[i]+1)
 				self.theta.append(EPSILON * np.random.random_sample(dim))
+			print self.theta
 		else:
 			raise Exception("Invalid use must supply either theta or params.")
 
 	"""
 	train neural network on provided dataset
 	"""
-	def train(self,X,y):
+	def train(self,X,y): 
 		#import pdb;pdb.set_trace();
 		theta0 = self.roll(self.theta)
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,approx_grad = False)
@@ -158,41 +165,40 @@ def sigmoidgradient(z):
 	s = sigmoid(z)
 	return s * (np.ones(z.shape) - s)
 
-def main():
+def prediction_test():
 	data = loadmat('ex3data1.mat')
 	X = data['X']
-
 	y = data['y'] - 1
 	y = np.array([i[0] for i in y])
 	data = loadmat('ex3weights.mat')
 	theta = [data['Theta1'],data['Theta2']]
-	params = [(25,401),(25,26),(10,26)]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params,theta)
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",theta=theta)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 	C,G = N.cost_function(X,y,N.roll(theta))
 	print "Cost a test Theta %f" % C
 
-def prop_test():
+def training_test():
 	data = loadmat('ex3data1.mat')
-	X = data['X'][490:510]
-	y = data['y'][490:510] - 1
-	y = np.array([i[0] for i in y])
-	params = [(100,401),(10,101)]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params)
-	N.train(X,y)
-	print "Test data accurate to %f" % N.get_accuracy(X,y)
-
-def lang_test():
-	data = loadmat("C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extrraction\\training.mat")
 	X = data['X']
-	import pdb;pdb.set_trace();
-	y = np.array([i[0] for i in data['y']])
-	params = [(500,X.shape[1]+1),(500,501),(2,501)]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"RussianVEnglish",params)
+	y = data['y'] - 1
+	y = np.array([i[0] for i in y])
+	layers = [400,25,10]
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",layer_sizes=layers)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
-if __name__ == "__main__": lang_test()
+def trainer():
+	filename = DEFAULT_DATA
+	if len(argv) ==2: filename = argv[1]
+	data = loadmat(filename)
+	X = data['X']
+	y = np.array([i[0] for i in data['y']])
+	layers = [X.shape[1],25,2]
+	N = NeuralNetwork(sigmoid,sigmoidgradient,"RussianVEnglish",layer_sizes=layers)
+	N.train(X,y)
+	print "Test data accurate to %f" % N.get_accuracy(X,y)
+
+if __name__ == "__main__": trainer()
 
 
 

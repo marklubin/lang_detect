@@ -10,9 +10,9 @@ Mark Lubin
 from scipy.io import loadmat,savemat
 import numpy as np
 from sys import argv
-from os import system,listdir,unlink
+from os import system,listdir,unlink,environ
 
-CONF_BASE = "%SMILE_CONF%\\"
+CONF_BASE = environ['SMILE_CONF'] + "\\"
 CONF_FILE = "emo_IS09.conf"
 FEATURES_FILE = "FEATS"
 
@@ -39,7 +39,8 @@ def main():
 	savemat(outfilename,results)
 
 def parse_features(fname):
-	system("SMILExtract -C %s -I %s -O %s" %(CONF_BASE + CONF_FILE, fname,FEATURES_FILE))
+	system("SMILExtract -C %s -I %s -O %s -noconsoleoutput -l 0" \
+		%(CONF_BASE + CONF_FILE, fname,FEATURES_FILE))
 	f = open(FEATURES_FILE,"r")
 
 	while f.readline() != "@data\n":pass
