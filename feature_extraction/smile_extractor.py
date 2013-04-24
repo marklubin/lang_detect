@@ -48,10 +48,7 @@ def parse_features(fname):
 	features = [float(x) for x in f.readline().split(',')[1:-1]]
 	f.close()
 	unlink(FEATURES_FILE)
-	return features
 	
-
-
 
 
 if __name__ == '__main__':main()

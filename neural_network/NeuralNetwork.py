@@ -10,21 +10,36 @@ import numpy as np
 from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
 from sys import argv
+import math
+
+
+"""
+default activation function and gradient
+"""
+def sigmoid(X):
+	return 1.0 / (1.0 + np.exp(-1. * X))
+
+def sigmoidgradient(z):
+	s = sigmoid(z)
+	return s * (np.ones(z.shape) - s)
+
+"""
+NeuralNetwork
+
+Keyword Args:
+
+activationFn 	: function eg. sigmoid
+activationFnGrad: gradient function eg. sigmoidgradient
+layer_sizes	    : nodes in NN in format [NFEATURES, LAYER1...LAYERN, NCLASSES]
+theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
+			  	  used with saved matrices only
+"""
 
 class NeuralNetwork:
-	"""
-	activationFn 	: function eg. sigmoid
-	activationFnGrad: gradient function eg. sigmoidgradient
-	description 	: what is this NN? Used as filename for output eg. 'EnglishVRussianClassifier'
-	layer_sizes	    : nodes in NN in format [NFEATURES, LAYER1...LAYERN, NCLASSES]
-	theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
-				  	  used with saved matrices only
-	"""
 
-	def __init__(self,activationFn,activationFnGrad,description,layer_sizes=None,theta=None):
+	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
-		self.description = description
 		self.theta = []		
 		if theta:
 			self.theta = theta
@@ -34,7 +49,6 @@ class NeuralNetwork:
 			for i in range(0,len(layer_sizes)-1):
 				dim = (layer_sizes[i+1],layer_sizes[i]+1)
 				self.theta.append(EPSILON * np.random.random_sample(dim))
-			print self.theta
 		else:
 			raise Exception("Invalid use must supply either theta or params.")
 
@@ -76,6 +90,7 @@ class NeuralNetwork:
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
 		A,Z = self.feedforward(X,theta)
+		print A[-1]
 		results = np.argmax(A[-1],1)
 		return results
 	
@@ -136,6 +151,9 @@ class NeuralNetwork:
 		J += R
 
 		G = self.gradient(A,Z,Y,(m,n),theta)
+
+		if math.isnan(J):
+			import pdb;pdb.set_trace();
 		
 		print "Cost: %f" % J
 
@@ -158,12 +176,10 @@ class NeuralNetwork:
 
 		return self.roll(G)
 
-def sigmoid(X):
-	return 1.0 / (1.0 + np.exp(-1. * X))
 
-def sigmoidgradient(z):
-	s = sigmoid(z)
-	return s * (np.ones(z.shape) - s)
+"""
+tests
+"""
 
 def prediction_test():
 	data = loadmat('ex3data1.mat')
@@ -172,7 +188,7 @@ def prediction_test():
 	y = np.array([i[0] for i in y])
 	data = loadmat('ex3weights.mat')
 	theta = [data['Theta1'],data['Theta2']]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",theta=theta)
+	N = NeuralNetwork(theta=theta)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 	C,G = N.cost_function(X,y,N.roll(theta))
 	print "Cost a test Theta %f" % C
@@ -183,10 +199,14 @@ def training_test():
 	y = data['y'] - 1
 	y = np.array([i[0] for i in y])
 	layers = [400,25,10]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",layer_sizes=layers)
+	N = NeuralNetwork(layer_sizes=layers)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
+"""
+trainer interface
+USAGE: python NeuralNetwork.py <TRAINING_DATA>
+"""
 def trainer():
 	filename = DEFAULT_DATA
 	if len(argv) ==2: filename = argv[1]
@@ -194,11 +214,11 @@ def trainer():
 	X = data['X']
 	y = np.array([i[0] for i in data['y']])
 	layers = [X.shape[1],25,2]
-	N = NeuralNetwork(sigmoid,sigmoidgradient,"RussianVEnglish",layer_sizes=layers)
+	N = NeuralNetwork(layer_sizes=layers)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
-if __name__ == "__main__": trainer()
+if __name__ == "__main__":trainer()
 
 
 
