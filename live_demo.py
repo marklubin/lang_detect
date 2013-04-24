@@ -14,7 +14,7 @@ from os import system,unlink,environ
 import numpy as np
 import subprocess as sp
 
-LANGS = ["English","Russian"]
+LANGS = ["English","Russian	"]
 CONF_BASE = environ['SMILE_CONF'] + "\\"
 CONF_RECORD_FILE = "demo\\audiorecorder.conf"
 WAVE_FILE = "out.wav"

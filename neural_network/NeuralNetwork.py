@@ -160,7 +160,7 @@ class NeuralNetwork:
 		return J,G
 
 
-	"""
+	"""	
 	calculate gradient using vectored, back propagation, variable layers
 	"""
 	def gradient(self,A,Z,Y,shape,theta):
@@ -211,14 +211,14 @@ def trainer():
 	filename = DEFAULT_DATA
 	if len(argv) ==2: filename = argv[1]
 	data = loadmat(filename)
-	X = data['XNormalized']
+	X = data['X']
 	y = np.array([i[0] for i in data['y']])
 	layers = [X.shape[1],25,3]
 	N = NeuralNetwork(layer_sizes=layers)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
-if __name__ == "__main__":training_test()
+if __name__ == "__main__":trainer()
 
 
 
