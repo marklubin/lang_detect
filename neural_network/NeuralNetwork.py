@@ -218,7 +218,7 @@ def trainer():
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 
-if __name__ == "__main__":trainer()
+if __name__ == "__main__":training_test()
 
 
 
