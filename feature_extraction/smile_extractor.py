@@ -20,8 +20,7 @@ def main():
 	directory = argv[1]
 	label = int(argv[2])
 	outfilename = argv[3]
-
-	X = y = None
+	
 	try:
 		 data = loadmat(outfilename)
 		 X = data['X'].tolist()

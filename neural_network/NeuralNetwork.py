@@ -6,7 +6,7 @@
 EPSILON = .12
 import numpy as np
 from scipy.io import loadmat,savemat
-from scipy.optimize import fmin_l_bfgs_b as minimizer
+from scipy.optimize import fmin_tnc as minimizer
 
 class NeuralNetwork:
 	"""
@@ -131,6 +131,7 @@ class NeuralNetwork:
 		G = self.gradient(A,Z,Y,(m,n),theta)
 		
 		print "Cost: %f" % J
+
 		return J,G
 
 
@@ -173,10 +174,10 @@ def main():
 
 def prop_test():
 	data = loadmat('ex3data1.mat')
-	X = data['X']
-	y = data['y'] - 1
+	X = data['X'][490:510]
+	y = data['y'][490:510] - 1
 	y = np.array([i[0] for i in y])
-	params = [(25,401),(10,26)]
+	params = [(100,401),(10,101)]
 	N = NeuralNetwork(sigmoid,sigmoidgradient,"ex3test",params)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
@@ -184,8 +185,9 @@ def prop_test():
 def lang_test():
 	data = loadmat("C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extrraction\\training.mat")
 	X = data['X']
+	import pdb;pdb.set_trace();
 	y = np.array([i[0] for i in data['y']])
-	params = [(100,X.shape[1]+1),(2,101)]
+	params = [(500,X.shape[1]+1),(500,501),(2,501)]
 	N = NeuralNetwork(sigmoid,sigmoidgradient,"RussianVEnglish",params)
 	N.train(X,y)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
