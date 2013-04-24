@@ -2,7 +2,22 @@
 	NeuralNetwork.py
 	MLP Neural Network
 	Mark Lubin
+
+	USAGE:
+
+		1.Train a neural network with layers
+			python NeuralNetwork.py -t <TRAINING_DATA_FILE>  <OUTPUT_FILE> <LAYER_SIZES>
+			<LAYER_SIZES> in single string seperate by comma 
+			eg. 25 hidden layers and 10 classes
+			25,10
+
+		2. Run trained network on data set show accuracy.
+			python NeuralNetwork -p <TEST_DATA_FILE> <THETA_FILE>
+
+		3. Run tests
+			python NeuralNetwork -test [TRAIN/PREDICT]
 """
+
 EPSILON = .12
 DEFAULT_DATA = "C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extraction\\training.mat"
 
@@ -11,7 +26,6 @@ from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
 from sys import argv
 import math
-
 
 """
 default activation function and gradient
@@ -22,6 +36,62 @@ def sigmoid(X):
 def sigmoidgradient(z):
 	s = sigmoid(z)
 	return s * (np.ones(z.shape) - s)
+"""
+feature normalizer
+"""
+def normalize(X):return X
+
+"""
+tests
+"""
+
+def prediction_test():
+	data = loadmat('ex3data1.mat')
+	X = data['X']
+	y = data['y'] - 1
+	y = np.array([i[0] for i in y])
+	data = loadmat('ex3weights.mat')
+	theta = [data['Theta1'],data['Theta2']]
+	N = NeuralNetwork(theta=theta)
+	print "Test data accurate to %f" % N.get_accuracy(X,y)
+	C,G = N.cost_function(X,y,N.roll(theta))
+	print "Cost a test Theta %f (should be near .3844)" % C
+
+def training_test():
+	data = loadmat('ex3data1.mat')
+	X = data['X']
+	y = data['y'] - 1
+	y = np.array([i[0] for i in y])
+	layers = [400,25,10]
+	N = NeuralNetwork(layer_sizes=layers)
+	N.train(X,y)
+	print "Accurate to %f (should be > .93)" % N.get_accuracy(X,y)
+
+"""
+trainer interface
+"""
+def trainer(filename,outfile,layer_sizes):
+	data = loadmat(filename)
+	X = data['X']
+	X = normalize(X)
+	layer_sizes.insert(0,X.shape[1])
+	y = np.array([i[0] for i in data['y']])
+	N = NeuralNetwork(layer_sizes=layer_sizes)
+	N.train(X,y)
+
+	thetas = {}
+	for i,theta in enumerate(N.theta):
+		vname = 'T%d' % i
+		thetas[vname] = theta
+	savemat(outfile,thetas)
+	print "\n\nSaved data to %s." % outfile
+	print "Training data self test accurate to %f" % N.get_accuracy(X,y)
+
+"""
+predictor interface
+"""
+def predictor(datafile,thetafile):pass
+
 
 """
 NeuralNetwork
@@ -56,10 +126,8 @@ class NeuralNetwork:
 	train neural network on provided dataset
 	"""
 	def train(self,X,y): 
-		#import pdb;pdb.set_trace();
 		theta0 = self.roll(self.theta)
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,approx_grad = False)
-		#,lambda x: self.gradient(X,y,x))
 		self.theta = self.unroll(self.theta,results[0])
 
 	"""
@@ -90,7 +158,6 @@ class NeuralNetwork:
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
 		A,Z = self.feedforward(X,theta)
-		print A[-1]
 		results = np.argmax(A[-1],1)
 		return results
 	
@@ -152,10 +219,8 @@ class NeuralNetwork:
 
 		G = self.gradient(A,Z,Y,(m,n),theta)
 
-		if math.isnan(J):
-			import pdb;pdb.set_trace();
-		
-		print "Cost: %f" % J
+		if math.isnan(J):import pdb;pdb.set_trace();
+	
 
 		return J,G
 
@@ -177,52 +242,46 @@ class NeuralNetwork:
 		return self.roll(G)
 
 
-"""
-tests
-"""
 
-def prediction_test():
-	data = loadmat('ex3data1.mat')
-	X = data['X']
-	y = data['y'] - 1
-	y = np.array([i[0] for i in y])
-	data = loadmat('ex3weights.mat')
-	theta = [data['Theta1'],data['Theta2']]
-	N = NeuralNetwork(theta=theta)
-	print "Test data accurate to %f" % N.get_accuracy(X,y)
-	C,G = N.cost_function(X,y,N.roll(theta))
-	print "Cost a test Theta %f" % C
+def main():
+	if len(argv) < 2: 
+		print "Invalid Usage."
+		return
 
-def training_test():
-	data = loadmat('ex3data1.mat')
-	X = data['X']
-	y = data['y'] - 1
-	y = np.array([i[0] for i in y])
-	layers = [400,25,10]
-	N = NeuralNetwork(layer_sizes=layers)
-	N.train(X,y)
-	print "Test data accurate to %f" % N.get_accuracy(X,y)
+	switch = argv[1]
 
-"""
-trainer interface
-USAGE: python NeuralNetwork.py <TRAINING_DATA>
-"""
-def trainer():
-	filename = DEFAULT_DATA
-	if len(argv) ==2: filename = argv[1]
-	data = loadmat(filename)
-	X = data['X']
-	y = np.array([i[0] for i in data['y']])
-	layers = [X.shape[1],25,3]
-	N = NeuralNetwork(layer_sizes=layers)
-	N.train(X,y)
-	print "Test data accurate to %f" % N.get_accuracy(X,y)
-
-if __name__ == "__main__":trainer()
+	if(switch == '-t'):
+		if len(argv) != 5:
+			print "Invalid Usage for -t."
+			return
+		infile = argv[2]
+		outfile = argv[3]
+		try:
+			sizes = [int(x) for x in argv[4].split(',')]
+		except Exception:
+			print "Couldn't parse layer sizes."
+			return
+		#import pdb;pdb.set_trace();
+		trainer(infile,outfile,sizes)
+	elif(switch == '-p'):
+		if len(argv) != 4:
+			print "Invalid Usage for -p."
+		datafile = argv[2]
+		thetafile = argv[3]
+		predictor(datafile,thetafile)
+	elif(switch == '-test'):
+		if len(argv) != 3:
+			print "Invalid Usage to -test."
+		if argv[2] == 'TRAIN':
+			training_test()
+		elif argv[2] == 'PREDICT':
+			prediction_test()
+		else:
+			print "No such test %s." % argv[2]
+			return
+	else:
+		print "No such option %s" % switch
 
 
 
-
-
-
-
+if __name__ == "__main__":main()
