@@ -8,7 +8,7 @@
 		1.Train a neural network with layers
 			python NeuralNetwork.py -t <TRAINING_DATA_FILE>  <OUTPUT_FILE> <LAYER_SIZES>
 			<LAYER_SIZES> in single string seperate by comma 
-			eg. 25 hidden layers and 10 classes
+			eg. 25 hidden layers and 10 output classes
 			25,10
 
 		2. Run trained network on data set show accuracy.
@@ -261,7 +261,6 @@ def main():
 		except Exception:
 			print "Couldn't parse layer sizes."
 			return
-		#import pdb;pdb.set_trace();
 		trainer(infile,outfile,sizes)
 	elif(switch == '-p'):
 		if len(argv) != 4:
