@@ -34,7 +34,7 @@ def main():
 	rec_proc.wait()
 
 	#get the features
-	X = np.array(parse_features(WAVE_FILE))
+	X = np.array(parse_features(WAVE_FILE,SMILE_CALL,CONF_FILE))
 	X = np.reshape(X,(1,X.shape[0]))
 
 
@@ -44,7 +44,7 @@ def main():
 	N.load(weights_file)
 	
 	prediction = N.predict(X)[0]
-
+	
 	#get language and print result
 	language = LANGS[prediction]
 	print "That sounds like %s to me." % language

@@ -109,7 +109,6 @@ activationFn 	: function eg. sigmoid
 activationFnGrad: gradient function eg. sigmoidgradient
 layer_sizes	    : nodes in NN in format [NFEATURES, LAYER1...LAYERN, NCLASSES]
 theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
-			  	  used with saved matrices only
 mean 			: mean for normalization transformation
 std             : std for normalization  transformation
 lmbda           : regularization parameter

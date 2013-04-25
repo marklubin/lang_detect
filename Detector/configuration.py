@@ -46,5 +46,5 @@ LANGS_KEY = 'languages'
 """
 dummy files
 """
-FEATURES_FILE = "FEATS"
+FEATURES_FILE = "features.arff"
 WAVE_FILE = "out.wav"
