@@ -33,8 +33,7 @@ def main():
 		features = parse_features(directory + "\\" + fname)
 		X.append(features)
 		y.append(label)
-
-	X = normalized(X)
+		
 	results = {'X' : np.array(X),'y' :y}
 
 	savemat(outfilename,results)
@@ -50,9 +49,6 @@ def parse_features(fname):
 	unlink(FEATURES_FILE)
 
 	return features
-
-def normalized(X):
-	return X
 	
 
 
