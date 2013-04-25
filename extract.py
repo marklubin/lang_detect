@@ -2,7 +2,7 @@
 extract.py
 -append the feature matrices with result of running extactor on directory
 -call as 
-	python extract.py <DIRECTORY> <LABEL> <MAT_FILE>
+	python extract.py <DIRECTORY> -L <LABEL> -o <MAT_FILE>
 	<LABEL> = language name eg. English
 
 Mark Lubin
