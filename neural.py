@@ -7,58 +7,65 @@
 	USAGE:
 
 		1.Train a neural network with layers
-			python neural.py -t <TRAINING_DATA_FILE>  <OUTPUT_FILE> <LAYER_SIZES>
-			<LAYER_SIZES> in single string seperate by comma 
-			eg. 25 hidden layers and 10 output classes
-			25,10
+			python neural.py --MODE train -training TRAINING_DATA_FILE -o OUTPUT_FILE [-lmbda LMBDA] -layers L1 L2 ... LN 
 
 		2. Run trained network on data set show accuracy.
-			python neural.py -p <TEST_DATA_FILE> <THETA_FILE>
-
-		3. Run tests
-			python neural.py -test [TRAIN/PREDICT]
+			python neural.py --MODE predict -test TEST_DATA_FILE -classifier CLASSIFIER_FILE
 """
 from Detector.NeuralNetwork.NeuralNetwork import *
 from Detector.configuration import *
-from sys import argv 
+import argparse
 
 def main():
-	if len(argv) < 2: 
-		print "Invalid Usage."
+
+	parser = argparse.ArgumentParser('Neutral Network command Line Interface.')
+	parser.add_argument('--MODE',metavar='Usage mode.',type=str,\
+						help='one of ' + str(NEURAL_MODES) + " how you want to use the NeuralNetwork.")
+	parser.add_argument('--RUNTEST',action='store_true')
+	parser.add_argument('-training',metavar='TRAINING_FILE',type=str,\
+						help='Location of training data file relative to features folder when using training mode.')
+	parser.add_argument('-o',metavar="OUTFILE",type=str,\
+		help ='location of output file for classifier when training, relative to classifiers folder when using training mode.')
+	parser.add_argument('-test',metavar='TEST_FILE',type=str,\
+						help='Location of test data file relative to features folder when using prediction mode.')
+	parser.add_argument('-classifier',metavar='WEIGHTS_FILE',type=str,\
+						help='Location of weights/theta file to use relative to classifiers folder when using prediction mode.')
+	parser.add_argument('-lmbda',metavar='LAMBDA',type=float,default=1.,required=False,\
+						help='regularization parameter when using training mode, defaults to 1.')
+	parser.add_argument('-logfile',metavar='LOGFILE',type=str,default=CLASSIFIER_LOG_FILE,\
+						help="""where to write the results of running the classifier in prediction mode
+							  appends file if exists otherwise creates it, path relative to testing directory, 
+							  defaults to CLASSIFIER_LOG_FILE""")
+	parser.add_argument('-layers',metavar='LAYERS',type=int,nargs=argparse.REMAINDER,\
+						help="""Hidden layer sizes seperated by spaces, eg. for 25 node single hidden layer
+								do '-layers 25' for 2 hiddens layers, first of size 25 second of size 10 do
+								'-layers 25 10', only needed in training mode, must be final arg!""")
+	args = parser.parse_args()
+	mode = args.MODE
+
+	#just run test cases and exit if this flag is set
+	if args.RUNTEST:
+		prediction_test(TRAINING_TEST_FILE,WEIGHTS_TEST_FILE)
+		training_test(TRAINING_TEST_FILE)
 		return
 
-	switch = argv[1]
-
-	if(switch == '-t'):
-		if len(argv) != 5:
-			print "Invalid Usage for -t."
+	if(mode == 'train'):
+		if not args.training or not args.o or not args.layers:
+			print "Not enough params for training."
 			return
-		infile = path.join(FEATURES_DIR,argv[2])
-		outfile = path.join(CLASSIFIERS_DIR,argv[3])
-		try:
-			sizes = [int(x) for x in argv[4].split(',')]
-		except Exception:
-			print "Couldn't parse layer sizes."
+		infile = path.join(FEATURES_DIR,args.training)
+		outfile = path.join(CLASSIFIERS_DIR,args.o)
+		sizes = args.layers
+		lmbda = args.lmbda
+		trainer(infile,outfile,sizes,lmbda)		
+	elif(mode == 'predict'):
+		if not args.test or not args.classifier:
+			print "Not enough params for prediction."
 			return
-		trainer(infile,outfile,sizes)
-	elif(switch == '-p'):
-		if len(argv) != 4:
-			print "Invalid Usage for -p."
-		datafile = path.join(FEATURES_DIR,argv[2])
-		thetafile = path.join(CLASSIFIERS_DIR,argv[2])
-		predictor(datafile,thetafile)
-	elif(switch == '-test'):
-		if len(argv) != 3:
-			print "Invalid Usage to -test."
-		if argv[2] == 'TRAIN':
-			training_test(TRAINING_TEST_FILE)
-		elif argv[2] == 'PREDICT':
-			prediction_test(TRAINING_TEST_FILE, WEIGHTS_TEST_FILE)
-		else:
-			print "No such test %s." % argv[2]
-			return
-	else:
-		print "No such option %s" % switch
+		datafile = path.join(FEATURES_DIR,args.test)
+		thetafile = path.join(CLASSIFIERS_DIR,args.classifier)
+		logfile = path.join(TESTING_DIR,args.logfile)
+		predictor(datafile,thetafile,logfile)
 
 
 

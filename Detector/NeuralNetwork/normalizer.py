@@ -24,6 +24,8 @@ def normalize2(X,meanVector,stdVector):
 	return np.divide((X-meanVector),stdVector)
 
 def normalize3(X,meanVector,stdVector):
-	meanMatrix = np.kron(np.ones((X.shape[0], 1)), meanVector)
-	stdMatrix = np.kron(np.ones((X.shape[0], 1)), stdVector)
+	meanVector = np.reshape(meanVector,(1,X.shape[1]))
+	stdVector = np.reshape(stdVector,(1,X.shape[1]))
+	meanMatrix = np.tile(meanVector,(X.shape[0],1))
+	stdMatrix = np.tile(stdVector,(X.shape[0],1))
 	return (X-meanMatrix)/stdMatrix

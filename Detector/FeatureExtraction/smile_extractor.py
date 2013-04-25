@@ -9,9 +9,8 @@ from scipy.io import loadmat,savemat
 from os import system,unlink,environ,path
 from ..configuration import *
 
-def parse_features(fname):
-	system("SMILExtract -C %s -I %s -O %s -noconsoleoutput" \
-		%(path.join(CONF_BASE,CONF_FILE), fname,FEATURES_FILE))
+def parse_features(fname,smile_call,configfile):
+	system(smile_call %(path.join(CONF_BASE,configfile), fname,FEATURES_FILE))
 	f = open(FEATURES_FILE,"r")
 	while f.readline() != "@data\n":pass
 	f.readline()

@@ -53,12 +53,14 @@ def training_test(fname):
 """
 trainer interface
 """
-def trainer(filename,outfile,layer_sizes):
+def trainer(filename,outfile,layer_sizes,lmbda):
 	data = loadmat(filename)
-	X = data['X']
+	X = data[X_KEY]
+	nLabels = data[NLABELS_KEY]
 	layer_sizes.insert(0,X.shape[1])
-	y = np.array([i[0] for i in data['y']])
-	N = NeuralNetwork(layer_sizes=layer_sizes)
+	layer_sizes.append(nLabels)
+	y = np.array([i[0] for i in data[Y_KEY]])
+	N = NeuralNetwork(layer_sizes=layer_sizes,lmbda=lmbda)
 	N.train(X,y)
 	N.save(outfile)
 	print "\n\nSaved data to %s." % outfile
@@ -67,7 +69,35 @@ def trainer(filename,outfile,layer_sizes):
 """
 predictor interface
 """
-def predictor(datafile,thetafile):pass
+def predictor(datafile,thetafile,logfile):
+
+	#get all the data
+	data = loadmat(datafile)
+	X = data[X_KEY]
+	y = np.array([i[0] for i in data[Y_KEY]])
+	nLabels = data[NLABELS_KEY]
+	languages = data[LANGS_KEY][0]
+	feature_set = data[FEATURE_SET_KEY][0]
+	N = NeuralNetwork()
+	N.load(thetafile)
+	cost,grad = N.cost_function(X,y,N.roll(N.theta))
+	accuracy = N.get_accuracy(X,y)
+	lmbda = N.lmbda
+
+	#write to log file
+	try:
+		f = open(logfile,'r')
+		f.close()
+	except IOError:
+		f = open(logfile,'w')
+		f.write(CLASSIFIER_LOG_FILE_HEADER)
+		f.close()
+	f = open(logfile,'a')
+	logline = "%s,%s,%s,%s,%d,%d,%d,%f,%f,%f\n" %\
+		(datafile,thetafile,languages,feature_set,X.shape[0],X.shape[1],nLabels,cost,accuracy,lmbda)
+	f.write(logline)
+	print "\nWrote prediction results to %s, accuracy %.4f" % (logfile,accuracy)
+	f.close()
 
 
 """
@@ -87,7 +117,8 @@ lmbda           : regularization parameter
 
 class NeuralNetwork:
 
-	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None,mean=None,std=None,lmbda=1):
+	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None,\
+					mean=None,std=None,lmbda=1):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
 		self.theta = []	
@@ -142,7 +173,6 @@ class NeuralNetwork:
 	"""
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
-
 		if self.mean is not None and self.std is not None:
 			#handle python row/col vector weirdness
 			if X.shape[0] == 1:
@@ -242,6 +272,7 @@ class NeuralNetwork:
 		data_dict[MEAN_KEY] = self.mean
 		data_dict[STD_KEY] = self.std
 		data_dict[LAYERS_KEY] = len(self.theta)
+		data_dict[LMBDA_KEY] = self.lmbda
 		for i,theta in enumerate(self.theta):
 			vname = 'T%d' % i
 			data_dict[vname] = theta
@@ -255,8 +286,8 @@ class NeuralNetwork:
 		data = loadmat(filename)
 		self.mean = data[MEAN_KEY]
 		self.std = data[STD_KEY]
+		self.lmbda = data[LMBDA_KEY][0][0]
 		nThetas = data[LAYERS_KEY]
-	
 		for i in range(0,nThetas):
 			theta_name = 'T%d' % i
 			self.theta.append(data[theta_name])
