@@ -21,7 +21,7 @@ def main():
 		print ("Need weights file.")
 		return 
 
-	weights_file = argv[1]
+	weights_file = path.join(CLASSIFIERS_DIR,argv[1])
 	fcall = "SMILExtractPA -C %s -sampleRate 44100 -channels 1 -O %s -noconsoleoutput -l 0"\
 		%(path.join(CONF_BASE,CONF_RECORD_FILE),WAVE_FILE)
 	fcall = fcall.split(' ')
@@ -34,20 +34,23 @@ def main():
 	rec_proc.wait()
 
 	#get the features
-	X = parse_features(WAVE_FILE)
+	X = np.array(parse_features(WAVE_FILE))
+	X = np.reshape(X,(1,X.shape[0]))
 
 	#load the Neural Network weights
 	theta = []
 	data = loadmat(weights_file)
-	for mat_name in data:
-		theta.append(data[mat_name])
+	nThetas = data[LAYERS_KEY]
+	for i in range(0,nThetas):
+		theta_name = 'T%d' % i
+		theta.append(data[theta_name])
 
 	#run the classifier
 	N = NN(theta=theta)
 	prediction = N.predict(X)[0]
 
 	#get language and print result
-	language = LANG[prediction]
+	language = LANGS[prediction]
 	print "That sounds like %s to me." % language
 
 if __name__ == '__main__':main()

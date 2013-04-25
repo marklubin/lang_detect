@@ -63,6 +63,7 @@ def trainer(filename,outfile,layer_sizes):
 	N.train(X,y)
 
 	thetas = {}
+	thetas[LAYERS_KEY] = len(N.theta)
 	for i,theta in enumerate(N.theta):
 		vname = 'T%d' % i
 		thetas[vname] = theta
@@ -119,6 +120,8 @@ class NeuralNetwork:
 	"""
 	def feedforward(self,X,theta):
 		nExamples, nFeatures = X.shape
+
+		#weirdness about column vectors
 		X = np.concatenate((np.ones((X.shape[0],1)),X),1)
 		A = [X[:]]
 		Z = [None] #spacer because there is no Z[0]
@@ -210,7 +213,7 @@ class NeuralNetwork:
 
 
 	"""	
-	calculate gradient using vectored, back propagation, variable layers
+	calculate gradient using vectorized, back propagation, variable layers
 	"""
 	def gradient(self,A,Z,Y,shape,theta):
 		m,n = shape

@@ -34,7 +34,7 @@ def main():
 			print "Invalid Usage for -t."
 			return
 		infile = path.join(FEATURES_DIR,argv[2])
-		outfile = path.join(CLASSIFIERS_DIR,argv[2])
+		outfile = path.join(CLASSIFIERS_DIR,argv[3])
 		try:
 			sizes = [int(x) for x in argv[4].split(',')]
 		except Exception:

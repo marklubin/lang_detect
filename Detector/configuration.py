@@ -4,7 +4,7 @@ Defined Constants etc.
 
 from os import path,environ
 
-LANGS = ["English","Russian	","French"]
+LANGS = ["English","Russian","French"]
 
 EPSILON = .12
 
@@ -17,6 +17,7 @@ WEIGHTS_TEST_FILE = path.abspath(path.join(".","testing","ex3weights.mat"))
 CLASSIFIERS_DIR = path.abspath(path.join(".","classifiers"))
 AUDIO_DIR = path.abspath(path.join(".","audio"))
 FEATURES_DIR = path.abspath(path.join(".","features"))
+LAYERS_KEY = 'NLAYERS'
 
 """
 SMILExtract configuration

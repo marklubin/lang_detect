@@ -1,17 +1,17 @@
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in SMILExtract : openSMILE starting!
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in SMILExtract : config file is: C:\Users\Mark\Desktop\open_smile\opensmile-1.0.1\config\emo_IS09.conf
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in cComponentManager : successfully registered 102 component types.
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in configManager : reading config file 'C:\Users\Mark\Desktop\open_smile\opensmile-1.0.1\config\emo_IS09.conf'
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in instance 'arffsink' : writing ARFF header (384 features)...
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in cComponentManager : successfully finished createInstances
                                  (17 component instances were finalised, 1 data memories were finalised)
-[ 24.04.2013 - 20:18:22 ]
+[ 24.04.2013 - 21:32:43 ]
     (MSG) [2] in cComponentManager : starting single thread processing loop
-[ 24.04.2013 - 20:18:22 ]
-    (MSG) [2] in cComponentManager : Processing finished! System ran for 406 ticks.
+[ 24.04.2013 - 21:32:43 ]
+    (MSG) [2] in cComponentManager : Processing finished! System ran for 449 ticks.
