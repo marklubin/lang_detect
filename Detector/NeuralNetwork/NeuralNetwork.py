@@ -1,31 +1,18 @@
 """
-	NeuralNetwork.py
-	MLP Neural Network
-	Mark Lubin
+NeuralNetwork.py
+MLP Neural Network with support for any number of hidden layers
 
-	USAGE:
-
-		1.Train a neural network with layers
-			python NeuralNetwork.py -t <TRAINING_DATA_FILE>  <OUTPUT_FILE> <LAYER_SIZES>
-			<LAYER_SIZES> in single string seperate by comma 
-			eg. 25 hidden layers and 10 output classes
-			25,10
-
-		2. Run trained network on data set show accuracy.
-			python NeuralNetwork -p <TEST_DATA_FILE> <THETA_FILE>
-
-		3. Run tests
-			python NeuralNetwork -test [TRAIN/PREDICT]
+Mark Lubin
 """
 
-EPSILON = .12
-DEFAULT_DATA = "C:\Users\Mark\Desktop\lang_detect\lang_detect\\feature_extraction\\training.mat"
 
 import numpy as np
+from ..configuration import *
+from math import isnan
+from normalizer import normalize
 from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
-from sys import argv
-import math
+
 
 """
 default activation function and gradient
@@ -36,29 +23,25 @@ def sigmoid(X):
 def sigmoidgradient(z):
 	s = sigmoid(z)
 	return s * (np.ones(z.shape) - s)
-"""
-feature normalizer
-"""
-def normalize(X):return X
 
 """
 tests
 """
 
-def prediction_test():
-	data = loadmat('ex3data1.mat')
+def prediction_test(datafile,weightsfile):
+	data = loadmat(datafile)
 	X = data['X']
 	y = data['y'] - 1
 	y = np.array([i[0] for i in y])
-	data = loadmat('ex3weights.mat')
+	data = loadmat(weightsfile)
 	theta = [data['Theta1'],data['Theta2']]
 	N = NeuralNetwork(theta=theta)
 	print "Test data accurate to %f" % N.get_accuracy(X,y)
 	C,G = N.cost_function(X,y,N.roll(theta))
 	print "Cost a test Theta %f (should be near .3844)" % C
 
-def training_test():
-	data = loadmat('ex3data1.mat')
+def training_test(fname):
+	data = loadmat(fname)
 	X = data['X']
 	y = data['y'] - 1
 	y = np.array([i[0] for i in y])
@@ -127,6 +110,7 @@ class NeuralNetwork:
 	"""
 	def train(self,X,y): 
 		theta0 = self.roll(self.theta)
+		X = normalize(X)
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,approx_grad = False)
 		self.theta = self.unroll(self.theta,results[0])
 
@@ -219,7 +203,7 @@ class NeuralNetwork:
 
 		G = self.gradient(A,Z,Y,(m,n),theta)
 
-		if math.isnan(J):import pdb;pdb.set_trace();
+		if isnan(J):import pdb;pdb.set_trace();
 	
 
 		return J,G
@@ -243,44 +227,3 @@ class NeuralNetwork:
 
 
 
-def main():
-	if len(argv) < 2: 
-		print "Invalid Usage."
-		return
-
-	switch = argv[1]
-
-	if(switch == '-t'):
-		if len(argv) != 5:
-			print "Invalid Usage for -t."
-			return
-		infile = argv[2]
-		outfile = argv[3]
-		try:
-			sizes = [int(x) for x in argv[4].split(',')]
-		except Exception:
-			print "Couldn't parse layer sizes."
-			return
-		trainer(infile,outfile,sizes)
-	elif(switch == '-p'):
-		if len(argv) != 4:
-			print "Invalid Usage for -p."
-		datafile = argv[2]
-		thetafile = argv[3]
-		predictor(datafile,thetafile)
-	elif(switch == '-test'):
-		if len(argv) != 3:
-			print "Invalid Usage to -test."
-		if argv[2] == 'TRAIN':
-			training_test()
-		elif argv[2] == 'PREDICT':
-			prediction_test()
-		else:
-			print "No such test %s." % argv[2]
-			return
-	else:
-		print "No such option %s" % switch
-
-
-
-if __name__ == "__main__":main()

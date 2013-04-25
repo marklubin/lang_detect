@@ -1,23 +1,20 @@
 """
-live_demo.py
+demo.py
 automatically extract features and return class
 
-USAGE: python live_demo.py <THETA_WEIGHTS_MAT_FILE>
+USAGE: python demo.py <THETA_WEIGHTS_MAT_FILE>
 
 Mark Lubin
 """
-from feature_extraction.smile_extractor import parse_features
-from neural_network.NeuralNetwork import NeuralNetwork as NN
+from Detector.FeatureExtraction.smile_extractor import parse_features
+from Detector.NeuralNetwork.NeuralNetwork import NeuralNetwork as NN
+from Detector.configuration import *
 from scipy.io import loadmat
 from sys import argv
-from os import system,unlink,environ
+from os import system,unlink,environ,path
 import numpy as np
 import subprocess as sp
 
-LANGS = ["English","Russian	"]
-CONF_BASE = environ['SMILE_CONF'] + "\\"
-CONF_RECORD_FILE = "demo\\audiorecorder.conf"
-WAVE_FILE = "out.wav"
 
 def main():
 	if len(argv) != 2:
@@ -26,7 +23,7 @@ def main():
 
 	weights_file = argv[1]
 	fcall = "SMILExtractPA -C %s -sampleRate 44100 -channels 1 -O %s -noconsoleoutput -l 0"\
-		%(CONF_BASE + CONF_RECORD_FILE,WAVE_FILE)
+		%(path.join(CONF_BASE,CONF_RECORD_FILE),WAVE_FILE)
 	fcall = fcall.split(' ')
 	
 	#record audio 
