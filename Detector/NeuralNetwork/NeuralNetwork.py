@@ -82,14 +82,16 @@ theta       	: list of theta matrices eg. theta[0] is theta for input->hidden la
 			  	  used with saved matrices only
 mean 			: mean for normalization transformation
 std             : std for normalization  transformation
+lmbda           : regularization parameter
 """
 
 class NeuralNetwork:
 
-	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None,mean=None,std=None):
+	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None,mean=None,std=None,lmbda=1):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
 		self.theta = []	
+		self.lmbda = lmbda
 		self.mean = mean
 		self.std = std	
 		if theta:
@@ -191,7 +193,7 @@ class NeuralNetwork:
 	"""
 	return cost & gradient for this theta
 	"""
-	def cost_function(self,X,y,flat_theta,lmbd=1.):
+	def cost_function(self,X,y,flat_theta):
 		theta = self.unroll(self.theta,flat_theta)
 		Y  = self.bool_matrix_rep(y,self.theta[-1].shape[0])
 		A,Z = self.feedforward(X,theta)
@@ -205,7 +207,7 @@ class NeuralNetwork:
 		J = 1./m * np.sum(np.sum(J))
 		
 		#compute regularization term
-		R =  lmbd/(2.0 * m) * sum([sum([q**2 for q in np.nditer(layer)]) for layer in theta])
+		R =  self.lmbda/(2.0 * m) * sum([sum([q**2 for q in np.nditer(layer)]) for layer in theta])
 		J += R
 
 		G = self.gradient(A,Z,Y,(m,n),theta)

@@ -3,6 +3,7 @@ extract.py
 -append the feature matrices with result of running extactor on directory
 -call as 
 	python extract.py <DIRECTORY> <LABEL> <MAT_FILE>
+	<LABEL> = language name eg. English
 
 Mark Lubin
 """
@@ -16,7 +17,13 @@ from os import path,listdir
 
 def main():
 	directory = path.join(AUDIO_DIR,argv[1])
-	label = int(argv[2])
+	lang = argv[2]
+	try:
+		label = LANGS.index(lang)
+	except Exception:
+		print "No class for language %s, update configuration.py to add." % lang
+		return
+
 	outfilename = path.join(FEATURES_DIR,argv[3])
 	
 	try:

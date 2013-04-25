@@ -22,7 +22,7 @@ def main():
 		return 
 
 	weights_file = path.join(CLASSIFIERS_DIR,argv[1])
-	fcall = "SMILExtractPA -C %s -sampleRate 44100 -channels 1 -O %s -noconsoleoutput -l 0"\
+	fcall = "SMILExtractPA -C %s -sampleRate 44100 -channels 1 -O %s -noconsoleoutput"\
 		%(path.join(CONF_BASE,CONF_RECORD_FILE),WAVE_FILE)
 	fcall = fcall.split(' ')
 	
