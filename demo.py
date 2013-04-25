@@ -37,16 +37,12 @@ def main():
 	X = np.array(parse_features(WAVE_FILE))
 	X = np.reshape(X,(1,X.shape[0]))
 
-	#load the Neural Network weights
-	theta = []
-	data = loadmat(weights_file)
-	nThetas = data[LAYERS_KEY]
-	for i in range(0,nThetas):
-		theta_name = 'T%d' % i
-		theta.append(data[theta_name])
+
 
 	#run the classifier
-	N = NN(theta=theta)
+	N = NN()
+	N.load(weights_file)
+	
 	prediction = N.predict(X)[0]
 
 	#get language and print result

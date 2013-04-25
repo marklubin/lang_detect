@@ -18,6 +18,8 @@ CLASSIFIERS_DIR = path.abspath(path.join(".","classifiers"))
 AUDIO_DIR = path.abspath(path.join(".","audio"))
 FEATURES_DIR = path.abspath(path.join(".","features"))
 LAYERS_KEY = 'NLAYERS'
+MEAN_KEY = 'MEAN'
+STD_KEY = 'STD'
 
 """
 SMILExtract configuration

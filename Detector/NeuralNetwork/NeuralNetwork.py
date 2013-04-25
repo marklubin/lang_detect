@@ -9,7 +9,7 @@ Mark Lubin
 import numpy as np
 from ..configuration import *
 from math import isnan
-from normalizer import normalize
+from normalizer import normalize,normalize2,normalize3
 from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
 
@@ -56,18 +56,11 @@ trainer interface
 def trainer(filename,outfile,layer_sizes):
 	data = loadmat(filename)
 	X = data['X']
-	X = normalize(X)
 	layer_sizes.insert(0,X.shape[1])
 	y = np.array([i[0] for i in data['y']])
 	N = NeuralNetwork(layer_sizes=layer_sizes)
 	N.train(X,y)
-
-	thetas = {}
-	thetas[LAYERS_KEY] = len(N.theta)
-	for i,theta in enumerate(N.theta):
-		vname = 'T%d' % i
-		thetas[vname] = theta
-	savemat(outfile,thetas)
+	N.save(outfile)
 	print "\n\nSaved data to %s." % outfile
 	print "Training data self test accurate to %f" % N.get_accuracy(X,y)
 
@@ -87,14 +80,18 @@ activationFnGrad: gradient function eg. sigmoidgradient
 layer_sizes	    : nodes in NN in format [NFEATURES, LAYER1...LAYERN, NCLASSES]
 theta       	: list of theta matrices eg. theta[0] is theta for input->hidden layer transformation
 			  	  used with saved matrices only
+mean 			: mean for normalization transformation
+std             : std for normalization  transformation
 """
 
 class NeuralNetwork:
 
-	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None):
+	def __init__(self,activationFn=sigmoid,activationFnGrad=sigmoidgradient,layer_sizes=None,theta=None,mean=None,std=None):
 		self.activationFn = activationFn
 		self.activationFnGrad = activationFnGrad
-		self.theta = []		
+		self.theta = []	
+		self.mean = mean
+		self.std = std	
 		if theta:
 			self.theta = theta
 		elif layer_sizes:
@@ -103,17 +100,16 @@ class NeuralNetwork:
 			for i in range(0,len(layer_sizes)-1):
 				dim = (layer_sizes[i+1],layer_sizes[i]+1)
 				self.theta.append(EPSILON * np.random.random_sample(dim))
-		else:
-			raise Exception("Invalid use must supply either theta or params.")
 
 	"""
 	train neural network on provided dataset
 	"""
 	def train(self,X,y): 
 		theta0 = self.roll(self.theta)
-		X = normalize(X)
+		X,self.mean,self.std = normalize(X)
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,approx_grad = False)
 		self.theta = self.unroll(self.theta,results[0])
+		return results
 
 	"""
 	feedforward that returns A & Z as lists
@@ -144,6 +140,14 @@ class NeuralNetwork:
 	"""
 	def predict(self,X,theta=None):
 		if not theta: theta = self.theta
+
+		if self.mean is not None and self.std is not None:
+			#handle python row/col vector weirdness
+			if X.shape[0] == 1:
+				normalize2(X,self.mean,self.std)
+			else:
+				X = normalize3(X,self.mean,self.std)
+
 		A,Z = self.feedforward(X,theta)
 		results = np.argmax(A[-1],1)
 		return results
@@ -227,6 +231,33 @@ class NeuralNetwork:
 		G = [d.T.dot(A[i])/m for i,d in enumerate(D)]
 
 		return self.roll(G)
+
+	"""
+	save NeuralNetwork params to file
+	"""
+	def save(self,filename):
+		data_dict = {}
+		data_dict[MEAN_KEY] = self.mean
+		data_dict[STD_KEY] = self.std
+		data_dict[LAYERS_KEY] = len(self.theta)
+		for i,theta in enumerate(self.theta):
+			vname = 'T%d' % i
+			data_dict[vname] = theta
+		savemat(filename,data_dict)
+
+	"""
+	load NeuralNetwork params from filename
+	"""
+	def load(self,filename):
+		theta = []
+		data = loadmat(filename)
+		self.mean = data[MEAN_KEY]
+		self.std = data[STD_KEY]
+		nThetas = data[LAYERS_KEY]
+	
+		for i in range(0,nThetas):
+			theta_name = 'T%d' % i
+			self.theta.append(data[theta_name])
 
 
 
