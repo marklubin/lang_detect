@@ -3,6 +3,8 @@ Defined Constants etc.
 """
 
 from os import path,environ
+import numpy as np
+from scipy.io import loadmat,savemat
 
 LANGS = ["English","Russian","French"]
 

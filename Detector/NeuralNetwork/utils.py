@@ -3,8 +3,6 @@ Neural Network Utility Functions
 
 Mark Lubin
 """
-import numpy as np
-from scipy.io import loadmat,savemat
 import NeuralNetwork as NN
 from ..configuration import *
 

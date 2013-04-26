@@ -5,7 +5,6 @@ extract features from SMILExtractor using ARFF output format
 Mark Lubin
 """
 
-from scipy.io import loadmat,savemat
 from os import system,unlink,environ,path
 from ..configuration import *
 

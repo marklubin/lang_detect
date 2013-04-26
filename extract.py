@@ -1,4 +1,5 @@
-"""
+ 
+ """
 extract.py
 -append the feature matrices with result of running extactor on directory
 -call as 
@@ -10,8 +11,6 @@ Mark Lubin
 
 from Detector.FeatureExtraction.smile_extractor import parse_features
 from Detector.configuration import *
-from scipy.io import loadmat,savemat
-import numpy as np
 from os import path,listdir
 import argparse
 

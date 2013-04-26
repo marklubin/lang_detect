@@ -14,12 +14,9 @@ lmbda           : regularization parameter
 
 Mark Lubin
 """
-
-import numpy as np
 from ..configuration import *
 from math import isnan
 from normalizer import normalize,normalize2,normalize3
-from scipy.io import loadmat,savemat
 from scipy.optimize import fmin_tnc as minimizer
 from .utils import *
 
