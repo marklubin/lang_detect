@@ -2,108 +2,7 @@
 NeuralNetwork.py
 MLP Neural Network with support for any number of hidden layers
 
-Mark Lubin
-"""
-
-
-import numpy as np
-from ..configuration import *
-from math import isnan
-from normalizer import normalize,normalize2,normalize3
-from scipy.io import loadmat,savemat
-from scipy.optimize import fmin_tnc as minimizer
-
-
-"""
-default activation function and gradient
-"""
-def sigmoid(X):
-	return 1.0 / (1.0 + np.exp(-1. * X))
-
-def sigmoidgradient(z):
-	s = sigmoid(z)
-	return s * (np.ones(z.shape) - s)
-
-"""
-tests
-"""
-
-def prediction_test(datafile,weightsfile):
-	data = loadmat(datafile)
-	X = data['X']
-	y = data['y'] - 1
-	y = np.array([i[0] for i in y])
-	data = loadmat(weightsfile)
-	theta = [data['Theta1'],data['Theta2']]
-	N = NeuralNetwork(theta=theta)
-	print "Test data accurate to %f" % N.get_accuracy(X,y)
-	C,G = N.cost_function(X,y,N.roll(theta))
-	print "Cost a test Theta %f (should be near .3844)" % C
-
-def training_test(fname):
-	data = loadmat(fname)
-	X = data['X']
-	y = data['y'] - 1
-	y = np.array([i[0] for i in y])
-	layers = [400,25,10]
-	N = NeuralNetwork(layer_sizes=layers)
-	N.train(X,y)
-	print "Accurate to %f (should be > .93)" % N.get_accuracy(X,y)
-
-"""
-trainer interface
-"""
-def trainer(filename,outfile,layer_sizes,lmbda):
-	data = loadmat(filename)
-	X = data[X_KEY]
-	nLabels = data[NLABELS_KEY]
-	layer_sizes.insert(0,X.shape[1])
-	layer_sizes.append(nLabels)
-	y = np.array([i[0] for i in data[Y_KEY]])
-	N = NeuralNetwork(layer_sizes=layer_sizes,lmbda=lmbda)
-	N.train(X,y)
-	N.save(outfile)
-	print "\n\nSaved data to %s." % outfile
-	print "Training data self test accurate to %f" % N.get_accuracy(X,y)
-
-"""
-predictor interface
-"""
-def predictor(datafile,thetafile,logfile):
-
-	#get all the data
-	data = loadmat(datafile)
-	X = data[X_KEY]
-	y = np.array([i[0] for i in data[Y_KEY]])
-	nLabels = data[NLABELS_KEY]
-	languages = data[LANGS_KEY][0]
-	feature_set = data[FEATURE_SET_KEY][0]
-	N = NeuralNetwork()
-	N.load(thetafile)
-	cost,grad = N.cost_function(X,y,N.roll(N.theta))
-	accuracy = N.get_accuracy(X,y)
-	lmbda = N.lmbda
-
-	#write to log file
-	try:
-		f = open(logfile,'r')
-		f.close()
-	except IOError:
-		f = open(logfile,'w')
-		f.write(CLASSIFIER_LOG_FILE_HEADER)
-		f.close()
-	f = open(logfile,'a')
-	logline = "%s,%s,%s,%s,%d,%d,%d,%f,%f,%f\n" %\
-		(datafile,thetafile,languages,feature_set,X.shape[0],X.shape[1],nLabels,cost,accuracy,lmbda)
-	f.write(logline)
-	print "\nWrote prediction results to %s, accuracy %.4f" % (logfile,accuracy)
-	f.close()
-
-
-"""
-NeuralNetwork
-
-Keyword Args:
+NeuralNetwork Keyword Args:
 
 activationFn 	: function eg. sigmoid
 activationFnGrad: gradient function eg. sigmoidgradient
@@ -112,7 +11,17 @@ theta       	: list of theta matrices eg. theta[0] is theta for input->hidden la
 mean 			: mean for normalization transformation
 std             : std for normalization  transformation
 lmbda           : regularization parameter
+
+Mark Lubin
 """
+
+import numpy as np
+from ..configuration import *
+from math import isnan
+from normalizer import normalize,normalize2,normalize3
+from scipy.io import loadmat,savemat
+from scipy.optimize import fmin_tnc as minimizer
+from .utils import *
 
 class NeuralNetwork:
 
@@ -273,7 +182,7 @@ class NeuralNetwork:
 		data_dict[LAYERS_KEY] = len(self.theta)
 		data_dict[LMBDA_KEY] = self.lmbda
 		for i,theta in enumerate(self.theta):
-			vname = 'T%d' % i
+			vname = THETA_KEY_FORMAT_STR % i
 			data_dict[vname] = theta
 		savemat(filename,data_dict)
 
@@ -288,7 +197,7 @@ class NeuralNetwork:
 		self.lmbda = data[LMBDA_KEY][0][0]
 		nThetas = data[LAYERS_KEY]
 		for i in range(0,nThetas):
-			theta_name = 'T%d' % i
+			theta_name = THETA_KEY_FORMAT_STR % i
 			self.theta.append(data[theta_name])
 
 

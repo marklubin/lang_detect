@@ -9,6 +9,9 @@ LANGS = ["English","Russian","French"]
 NEURAL_MODES = ['train','predict']
 EPSILON = .12
 
+TRAIN = 'train'
+PREDICT = 'predict'
+
 """
 various data files, directories
 """
@@ -42,6 +45,7 @@ Y_KEY = 'y'
 NLABELS_KEY = 'nLabels'
 FEATURE_SET_KEY = 'features'
 LANGS_KEY = 'languages'
+THETA_KEY_FORMAT_STR = 'T%d'
 
 """
 dummy files

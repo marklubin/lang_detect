@@ -1,0 +1,2 @@
+testdatafile,classifierfile,languages,featureset,nExamples,nFeatures,nLabels,cost,accuracy,lmbda
+C:\Users\Mark\Desktop\lang_detect\lang_detect\features\vox3new.mat,C:\Users\Mark\Desktop\lang_detect\lang_detect\classifiers\classifiertest.mat,English-Russian-French,emo_IS09.conf,279,385,3,7.191600,0.989247,1.500000

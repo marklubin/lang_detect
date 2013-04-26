@@ -12,7 +12,7 @@
 		2. Run trained network on data set show accuracy.
 			python neural.py --MODE predict -test TEST_DATA_FILE -classifier CLASSIFIER_FILE
 """
-from Detector.NeuralNetwork.NeuralNetwork import *
+from Detector.NeuralNetwork import test,utils
 from Detector.configuration import *
 import argparse
 
@@ -41,15 +41,15 @@ def main():
 								do '-layers 25' for 2 hiddens layers, first of size 25 second of size 10 do
 								'-layers 25 10', only needed in training mode, must be final arg!""")
 	args = parser.parse_args()
-	mode = args.MODE
 
 	#just run test cases and exit if this flag is set
 	if args.RUNTEST:
-		prediction_test(TRAINING_TEST_FILE,WEIGHTS_TEST_FILE)
-		training_test(TRAINING_TEST_FILE)
+		test.prediction_test(TRAINING_TEST_FILE,WEIGHTS_TEST_FILE)
+		test.training_test(TRAINING_TEST_FILE)
 		return
 
-	if(mode == 'train'):
+	mode = args.MODE
+	if mode == TRAIN:
 		if not args.training or not args.o or not args.layers:
 			print "Not enough params for training."
 			return
@@ -57,15 +57,15 @@ def main():
 		outfile = path.join(CLASSIFIERS_DIR,args.o)
 		sizes = args.layers
 		lmbda = args.lmbda
-		trainer(infile,outfile,sizes,lmbda)		
-	elif(mode == 'predict'):
+		utils.trainer(infile,outfile,sizes,lmbda)		
+	elif mode == PREDICT:
 		if not args.test or not args.classifier:
 			print "Not enough params for prediction."
 			return
 		datafile = path.join(FEATURES_DIR,args.test)
 		thetafile = path.join(CLASSIFIERS_DIR,args.classifier)
 		logfile = path.join(TESTING_DIR,args.logfile)
-		predictor(datafile,thetafile,logfile)
+		utils.predictor(datafile,thetafile,logfile)
 
 
 
