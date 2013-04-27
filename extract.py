@@ -1,5 +1,4 @@
- 
- """
+"""
 extract.py
 -append the feature matrices with result of running extactor on directory
 -call as 

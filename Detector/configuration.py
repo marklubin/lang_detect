@@ -33,7 +33,7 @@ SMILExtract configuration
 CONF_BASE = environ['SMILE_CONF']
 CONF_RECORD_FILE = path.join("demo","audiorecorder.conf")
 CONF_FILE = "emo_IS09.conf"
-SMILE_CALL = "SMILExtract -C %s -I %s -O %s -noconsoleoutput"
+SMILE_CALL = "SMILExtract -C %s -I \"%s\" -O \"%s\" -noconsoleoutput"
 
 """
 mat file keys
