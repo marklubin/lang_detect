@@ -30,7 +30,7 @@ def trainer(filename,outfile,layer_sizes,lmbda):
 	N.train(X,y)
 	N.save(outfile)
 	print "\n\nSaved data to %s." % outfile
-	print "Training data self test accurate to %f" % N.get_accuracy(X,y)
+	print "Training data self test accurate to %f" % N.get_accuracy(X,y)[0]
 
 """
 predictor interface
