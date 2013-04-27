@@ -48,6 +48,8 @@ NLABELS_KEY = 'nLabels'
 FEATURE_SET_KEY = 'features'
 LANGS_KEY = 'languages'
 THETA_KEY_FORMAT_STR = 'T%d'
+Y_ACTUAL_KEY = 'yActual'
+Y_PREDICTED_KEY = 'yPredicted'
 
 """
 dummy files

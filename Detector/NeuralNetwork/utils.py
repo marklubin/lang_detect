@@ -35,7 +35,7 @@ def trainer(filename,outfile,layer_sizes,lmbda):
 """
 predictor interface
 """
-def predictor(datafile,thetafile,logfile):
+def predictor(datafile,thetafile,logfile,resultsfile):
 
 	#get all the data
 	data = loadmat(datafile)
@@ -47,11 +47,12 @@ def predictor(datafile,thetafile,logfile):
 	N = NN.NeuralNetwork()
 	N.load(thetafile)
 	cost,grad = N.cost_function(X,y,N.roll(N.theta))
-	accuracy = N.get_accuracy(X,y)
+	accuracy,predictions = N.get_accuracy(X,y)
 	lmbda = N.lmbda
 	loglinedata = (datafile,thetafile,languages,feature_set,\
 		X.shape[0],X.shape[1],nLabels,cost,accuracy,lmbda)
-
+	results = {Y_ACTUAL_KEY : y, Y_PREDICTED_KEY : predictions}
+	savemat(resultsfile,results)
 	logger(logfile,loglinedata)
 
 """

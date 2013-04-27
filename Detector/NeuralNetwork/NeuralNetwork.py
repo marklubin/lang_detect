@@ -93,7 +93,8 @@ class NeuralNetwork:
 	return the accuracy of the current thetas on the data set X
 	"""
 	def get_accuracy(self,X,y):
-		return sum(map(lambda x: 1 if x[0] == x[1] else 0,zip(self.predict(X),y))) / float(len(y))
+		predictions = self.predict(X)
+		return sum(map(lambda x: 1 if x[0] == x[1] else 0,zip(predictions,y))) / float(len(y)),predictions
 
 	"""
 	convert vector like [0 1 2] to [[1 0 0][0 1 0][0 0 1]]

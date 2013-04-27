@@ -36,6 +36,9 @@ def main():
 						help="""where to write the results of running the classifier in prediction mode
 							  appends file if exists otherwise creates it, path relative to testing directory, 
 							  defaults to CLASSIFIER_LOG_FILE""")
+	parser.add_argument('-resultsfile',metavar="RESULTS_FILE",type=str,\
+						help="""file to store actual y and predicted y, for use with prediction mode,
+								path relative to testing folder""")
 	parser.add_argument('-layers',metavar='LAYERS',type=int,nargs=argparse.REMAINDER,\
 						help="""Hidden layer sizes seperated by spaces, eg. for 25 node single hidden layer
 								do '-layers 25' for 2 hiddens layers, first of size 25 second of size 10 do
@@ -59,13 +62,14 @@ def main():
 		lmbda = args.lmbda
 		utils.trainer(infile,outfile,sizes,lmbda)		
 	elif mode == PREDICT:
-		if not args.test or not args.classifier:
+		if not args.test or not args.classifier or not args.resultsfile :
 			print "Not enough params for prediction."
 			return
 		datafile = path.join(FEATURES_DIR,args.test)
 		thetafile = path.join(CLASSIFIERS_DIR,args.classifier)
+		resultsfile = path.join(TESTING_DIR,args.resultsfile)
 		logfile = path.join(TESTING_DIR,args.logfile)
-		utils.predictor(datafile,thetafile,logfile)
+		utils.predictor(datafile,thetafile,logfile,resultsfile)
 
 
 
