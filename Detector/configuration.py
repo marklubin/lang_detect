@@ -6,7 +6,7 @@ from os import path,environ
 import numpy as np
 from scipy.io import loadmat,savemat
 
-LANGS = ["English","Russian","French"]
+LANGS = ["English","Russian","French","Mandarin"]
 
 NEURAL_MODES = ['train','predict']
 EPSILON = .12
