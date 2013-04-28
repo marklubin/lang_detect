@@ -19,7 +19,7 @@ various data files, directories
 """
 
 CLASSIFIER_LOG_FILE = path.abspath(path.join(".","testing","classifier.csv"))
-CLASSIFIER_LOG_FILE_HEADER = "testdatafile,classifierfile,languages,featureset,nExamples,nFeatures,nLabels,cost,accuracy,lmbda\n"
+CLASSIFIER_LOG_FILE_HEADER = "testdatafile,classifierfile,languages,featureset,thetashapes,nTrainingExamples,nTestExamples,nFeatures,nLabels,cost,accuracy,lmbda\n"
 TRAINING_TEST_FILE = path.abspath(path.join(".","testing","ex3data1.mat"))
 WEIGHTS_TEST_FILE = path.abspath(path.join(".","testing","ex3weights.mat"))
 CLASSIFIERS_DIR = path.abspath(path.join(".","classifiers"))
@@ -50,6 +50,7 @@ LANGS_KEY = 'languages'
 THETA_KEY_FORMAT_STR = 'T%d'
 Y_ACTUAL_KEY = 'yActual'
 Y_PREDICTED_KEY = 'yPredicted'
+NTRAININGEXAMPLES_KEY = 'nTrainingExamples'
 
 """
 dummy files

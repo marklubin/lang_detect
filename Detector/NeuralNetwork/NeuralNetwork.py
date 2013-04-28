@@ -30,6 +30,7 @@ class NeuralNetwork:
 		self.lmbda = lmbda
 		self.mean = mean
 		self.std = std	
+		self.nTrainingExamples = 0
 		if theta:
 			self.theta = theta
 		elif layer_sizes:
@@ -45,6 +46,7 @@ class NeuralNetwork:
 	def train(self,X,y): 
 		theta0 = self.roll(self.theta)
 		X,self.mean,self.std = normalize(X)
+		self.nTrainingExamples = X.shape[0]
 		results = minimizer(lambda x: self.cost_function(X,y,x),theta0,approx_grad = False)
 		self.theta = self.unroll(self.theta,results[0])
 		return results
@@ -179,6 +181,7 @@ class NeuralNetwork:
 		data_dict[STD_KEY] = self.std
 		data_dict[LAYERS_KEY] = len(self.theta)
 		data_dict[LMBDA_KEY] = self.lmbda
+		data_dict[NTRAININGEXAMPLES_KEY] = self.nTrainingExamples
 		for i,theta in enumerate(self.theta):
 			vname = THETA_KEY_FORMAT_STR % i
 			data_dict[vname] = theta
@@ -193,6 +196,7 @@ class NeuralNetwork:
 		self.mean = data[MEAN_KEY]
 		self.std = data[STD_KEY]
 		self.lmbda = data[LMBDA_KEY][0][0]
+		self.nTrainingExamples = data[NTRAININGEXAMPLES_KEY] 
 		nThetas = data[LAYERS_KEY]
 		for i in range(0,nThetas):
 			theta_name = THETA_KEY_FORMAT_STR % i

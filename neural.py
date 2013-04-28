@@ -7,7 +7,7 @@
 	USAGE:
 
 		1.Train a neural network with layers
-			python neural.py --MODE train -training TRAINING_DATA_FILE -o OUTPUT_FILE [-lmbda LMBDA] -layers L1 L2 ... LN 
+			python neural.py --MODE train -training TRAINING_DATA_FILE -o OUTPUT_FILE [-lmbda LMBDA][-n NUMBER_TRAINING_EXAMPLES] -layers L1 L2 ... LN 
 
 		2. Run trained network on data set show accuracy.
 			python neural.py --MODE predict -test TEST_DATA_FILE -classifier CLASSIFIER_FILE
@@ -36,6 +36,9 @@ def main():
 						help="""where to write the results of running the classifier in prediction mode
 							  appends file if exists otherwise creates it, path relative to testing directory, 
 							  defaults to CLASSIFIER_LOG_FILE""")
+	parser.add_argument('-n',metavar='NUMBER_TRAINING_EXAMPLES',type=int,\
+						help="""when using training mode, this optional parameter can control the number of training examples to use,
+								of course it must be smaller than the number of training examples available in the training file.""")
 	parser.add_argument('-resultsfile',metavar="RESULTS_FILE",type=str,\
 						help="""file to store actual y and predicted y, for use with prediction mode,
 								path relative to testing folder""")
@@ -60,7 +63,11 @@ def main():
 		outfile = path.join(CLASSIFIERS_DIR,args.o)
 		sizes = args.layers
 		lmbda = args.lmbda
-		utils.trainer(infile,outfile,sizes,lmbda)		
+		if args.n:
+			utils.subset_trainer(infile,outfile,sizes,lmbda,args.n)
+		else:
+			utils.trainer(infile,outfile,sizes,lmbda)	
+			
 	elif mode == PREDICT:
 		if not args.test or not args.classifier or not args.resultsfile :
 			print "Not enough params for prediction."

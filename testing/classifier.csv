@@ -1,4 +1,0 @@
-testdatafile,classifierfile,languages,featureset,nExamples,nFeatures,nLabels,cost,accuracy,lmbda
-C:\Users\Brendan\Documents\GitHub\lang_detect\features\PodcastTesting.mat,C:\Users\Brendan\Documents\GitHub\lang_detect\classifiers\PodcastClassifier.mat,English-Russian-French,emo_IS09.conf,702,385,3,12.564584,0.937322,1.000000
-C:\Users\Brendan\Documents\GitHub\lang_detect\features\PodcastTestingFinal.mat,C:\Users\Brendan\Documents\GitHub\lang_detect\classifiers\PodcastClassifierFinal.mat,English-Russian-French,emo_IS09.conf,595,385,3,15.333842,0.578151,0.100000
-C:\Users\Peter\Documents\GitHub\lang_detect\features\PodcastTestingFinal.mat,C:\Users\Peter\Documents\GitHub\lang_detect\classifiers\just_added_mandarin.mat,English-Russian-French-Mandarin,emo_IS09.conf,792,385,4,12.843781,0.433081,1.000000
